@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAKITECH Invoice</title>
+     <link rel="icon" href="img/NakiTech favicon.png" type="image/png">
+    <!-- HTML2PDF Library for Client-Side Downloading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        /* --- General Layout --- */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+            -webkit-print-color-adjust: exact;
+            padding-bottom: 50px; /* Add space at bottom for button */
+        }
+
+        /* --- Hide elements during printing/PDF generation --- */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: #fff;
+            }
+            .invoice-box {
+                box-shadow: none;
+            }
+        }
+
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            /* Ensure content fits on A4 */
+            position: relative;
+        }
+
+        /* --- Header Section (Brand Blue) --- */
+        .header {
+            background-color: #1E2248;
+            color: white;
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .logo-text span {
+            color: #26C6DA; /* Accent Cyan */
+        }
+
+        .invoice-title {
+            font-size: 32px;
+            font-weight: 300;
+            margin: 0;
+            text-align: right;
+            color: #FFB74D; /* Brand Yellow */
+        }
+
+        /* --- Information Columns --- */
+        .info-section {
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-col {
+            width: 48%;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #1E2248;
+            margin-bottom: 5px;
+            display: block;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .info-text {
+            margin: 0 0 15px 0;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        /* --- Items Table --- */
+        .table-section {
+            padding: 0 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #1E2248;
+            font-weight: bold;
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid #26C6DA;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        /* --- Totals Section --- */
+        .totals-section {
+            padding: 0 40px 40px 40px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .totals-box {
+            width: 300px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .total-row.final {
+            border-top: 2px solid #1E2248;
+            border-bottom: none;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1E2248;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #ddd;
+        }
+
+        .thank-you {
+            color: #1E2248;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        /* --- Action Bar (Download Button) --- */
+        .action-bar {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .btn-download {
+            background-color: #26C6DA;
+            color: #fff;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-download:hover {
+            background-color: #1E2248;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- INVOICE CONTENT ID WRAPPER -->
+    <div class="invoice-box" id="invoice-element">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="logo-text">
+                NAKI<span>TECH</span>
+            </div>
+            <h1 class="invoice-title">INVOICE</h1>
+        </div>
+
+        <!-- INFO -->
+        <div class="info-section">
+            <div class="info-col">
+                <span class="info-label">Billed To:</span>
+                <!-- N8N VARIABLE PLACEHOLDERS -->
+                <p class="info-text">
+                    <strong>{{clientName}}</strong><br>
+                    {{clientPhone}}<br>
+                    {{clientTownship}}<br>
+                    Yangon
+                </p>
+            </div>
+            
+            <div class="info-col" style="text-align: right;">
+                <span class="info-label">Invoice Details:</span>
+                <p class="info-text">
+                    Invoice #: <strong>{{invoiceNumber}}</strong><br>
+                    Date: {{currentDate}}<br>
+                    Due Date: Upon Receipt
+                </p>
+                <span class="info-label">Service Provider:</span>
+                <p class="info-text">
+                    NAKITECH<br>
+                    09 775828769
+                </p>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Description</th>
+                        <th class="text-right">Unit Price</th>
+                        <th class="text-right">Qty</th>
+                        <th class="text-right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Example Item 1 -->
+                    <tr>
+                        <td>
+                            <strong>{{serviceName}}</strong><br>
+                            <span style="font-size: 12px; color: #666;">Computer Home Service</span>
+                        </td>
+                        <td class="text-right">{{servicePrice}} Ks</td>
+                        <td class="text-right">1</td>
+                        <td class="text-right">{{servicePrice}} Ks</td>
+                    </tr>
+                    
+                    <!-- Example Item 2 (Transport) -->
+                    <tr>
+                        <td>
+                            <strong>Transport Fee</strong><br>
+                            <span style="font-size: 12px; color: #666;">Zone {{zoneName}}</span>
+                        </td>
+                        <td class="text-right">{{transportFee}} Ks</td>
+                        <td class="text-right">1</td>
+                        <td class="text-right">{{transportFee}} Ks</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TOTALS -->
+        <div class="totals-section">
+            <div class="totals-box">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span>{{subtotal}} Ks</span>
+                </div>
+                <div class="total-row final">
+                    <span>Total:</span>
+                    <span>{{totalAmount}} Ks</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div class="thank-you">Thank you for choosing NAKITECH!</div>
+            <p>If you have any questions about this invoice, please contact us at 09 775828769.</p>
+        </div>
+    </div>
+
+    <!-- Action Button (Now at the bottom) -->
+    <div class="action-bar no-print">
+        <button onclick="generatePDF()" class="btn-download">
+            <span>⬇️</span> Download PDF Invoice
+        </button>
+        <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+            Click to save a copy for your records.
+        </p>
+    </div>
+
+    <!-- SCRIPT TO HANDLE PDF DOWNLOAD -->
+    <script>
+        function generatePDF() {
+            // Select the invoice element
+            const element = document.getElementById('invoice-element');
+            
+            // PDF Options
+            const opt = {
+                margin:       0,
+                filename:     'NAKITECH_Invoice.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Generate and Save
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+    <script>
+    window.onload = function() {
+        // 1. Get the parameters from the URL
+        const params = new URLSearchParams(window.location.search);
+        
+        // 2. Define the keys we expect to find in the HTML ({{key}})
+        const keys = [
+            'clientName', 
+            'clientPhone', 
+            'clientTownship', 
+            'invoiceNumber', 
+            'currentDate', 
+            'serviceName', 
+            'servicePrice', 
+            'zoneName', 
+            'transportFee', 
+            'subtotal', 
+            'totalAmount'
+        ];
+
+        // 3. Replace the text in the HTML
+        // We scan the entire body and replace {{key}} with the value from URL
+        let htmlContent = document.body.innerHTML;
+
+        keys.forEach(key => {
+            const value = params.get(key) || 'N/A'; // Default to N/A if missing
+            // Create a regex to replace all instances of {{key}}
+            const regex = new RegExp(`{{${key}}}`, 'g');
+            htmlContent = htmlContent.replace(regex, value);
+        });
+
+        // 4. Update the DOM
+        document.body.innerHTML = htmlContent;
+
+        // 5. Re-bind the download button (because innerHTML replace kills event listeners)
+        document.querySelector('.btn-download').onclick = generatePDF;
+    };
+</script>
+
+</body>
+</html>
